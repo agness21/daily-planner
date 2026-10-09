@@ -3,6 +3,10 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
 
+const planRoutes = require('./routes/plans');
+
+const tachesRoutes = require('./routes/taches');
+
 require('dotenv').config(); //lire le fichier .env
 
 const app = express(); //cree l'app express
@@ -12,7 +16,8 @@ app.use(cors()); //autorisre les requetes cross-origin
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
-
+app.use('/api/plans', planRoutes);
+app.use('/api/taches', tachesRoutes);
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
