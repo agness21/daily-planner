@@ -19,7 +19,7 @@ router.post('/', authToken, async (req, res) => {
             return res.status(404).json({ error: 'Planning introuvable' }); }
         
         const result = await pool.query(
-            'INSERT INTO taches (plan_id, titre) VALUES ($1, $2) RETURNING *',
+            'INSERT INTO tache (id_plan, titre) VALUES ($1, $2) RETURNING *',
             [plan_id, titre]
         );
         res.status(201).json(result.rows[0]);
@@ -35,7 +35,7 @@ router.post('/', authToken, async (req, res) => {
 router.patch('/:id', authToken, async (req, res) => {
     try {
         const result = await pool.query(
-            'UPDATE taches SET terminee = NOT terminee WHERE id = $1 and id_plan IN (SELECT id FROM daily_plan WHERE user_id = $2) RETURNING *',
+            'UPDATE tache SET terminee = NOT terminee WHERE id = $1 and id_plan IN (SELECT id FROM daily_plan WHERE user_id = $2) RETURNING *',
             [req.params.id, req.userId]
         );
         if (result.rows.length === 0) {
@@ -54,7 +54,7 @@ router.patch('/:id', authToken, async (req, res) => {
 router.delete('/:id', authToken, async (req, res) => {
     try {
         const result = await pool.query(
-            'DELETE FROM taches WHERE id = $1 and id_plan IN (SELECT id FROM daily_plan WHERE user_id = $2) RETURNING *',
+            'DELETE FROM tache WHERE id = $1 and id_plan IN (SELECT id FROM daily_plan WHERE user_id = $2) RETURNING *',
             [req.params.id, req.userId]
         );
         if (result.rows.length === 0) {

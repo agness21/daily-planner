@@ -9,27 +9,27 @@ router.get('/:date', authToken, async (req, res) => {
     const { date } = req.params; // Récupérer la date depuis les paramètres de l'URL
     try {
         let result = await pool.query(
-            'SELECT * FROM plans WHERE user_id = $1 AND date = $2',
+            'SELECT * FROM daily_plan WHERE user_id = $1 AND date = $2',
             [req.userId, date]
         );
         let plan = result.rows[0];
         if (!plan) {
             result = await pool.query(
-                'INSERT INTO plans (user_id, date) VALUES ($1, $2) RETURNING *',
+                'INSERT INTO daily_plan (user_id, date) VALUES ($1, $2) RETURNING *',
                 [req.userId, date]
             );
             plan = result.rows[0];
         }
-        const taches = await pool.query('SELECT * FROM taches WHERE plan_id = $1 ORDER BY id', [plan.id]);
+        const taches = await pool.query('SELECT * FROM tache WHERE id_plan = $1 ORDER BY id', [plan.id]);
         const crenaux = await pool.query('SELECT * FROM crenaux WHERE plan_id = $1 ORDER BY heure', [plan.id]);
         const repas = await pool.query('SELECT * FROM repas WHERE plan_id = $1', [plan.id]);
-        const eau = await pool.query('SELECT * FROM suivi_eau WHERE plan_id = $1', [plan.id]);
+        const eau = await pool.query('SELECT * FROM suivi_eau WHERE id_plan = $1', [plan.id]);
 
         res.json({
             plan,
             taches: taches.rows,
             crenaux: crenaux.rows,
-            repas: repas.rows,
+            repas: repas.rows[0] || null,
             eau: eau.rows[0] || null,
         });
     }
