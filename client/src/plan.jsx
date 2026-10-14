@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 
 const API = 'http://localhost:5000/api';
 
+const HUMEURS = ['Excellent', 'Bien', 'Normal', 'Pas bien', 'Mal'];
+
 export default function Plan({ token , onLogout }) {
     const date = new Date().toLocaleDateString('en-CA'); // Format de date AAAA-MM-JJ
     const [plan, setPlan] = useState(null);
     const [taches, setTaches] = useState([]);
     const [titre, setTitre] = useState('');
     const [verres, setVerres] = useState(0);
+    const [humeur, setHumeur] = useState(null);
 
     const headers = {
         'Content-Type': 'application/json',
@@ -24,6 +27,7 @@ export default function Plan({ token , onLogout }) {
                 setPlan(data.plan);
                 setTaches(data.taches);
                 setVerres(data.eau ? data.eau.nb_verres : 0);
+                setHumeur(data.plan.humeur);
             });
     }, []);
 
@@ -68,6 +72,16 @@ export default function Plan({ token , onLogout }) {
         });
     }
 
+    //gestion de l'humeur
+    async function majHumeur(valeur) {
+        const nouvelle = valeur === humeur ? null : valeur;
+        setHumeur(nouvelle);
+        await fetch(`${API}/humeur`, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify({ plan_id : plan.id, humeur: nouvelle }),
+        });
+    }
 
     return (
         <div style={{ padding: 40, maxWidth: 480 }}>
@@ -109,6 +123,26 @@ export default function Plan({ token , onLogout }) {
     </div>
     <p>{verres} / 8 verres</p>
 
+
+    <h2>Humeur</h2>
+    <div>
+    {HUMEURS.map((h) => (
+        <button
+            key={h}
+            onClick={() => majHumeur(h)}
+            style={{
+                marginRight: 6,
+                padding: '8px 12px',
+                cursor: 'pointer',
+                border: '1.5px solid #4A5A2A',
+                background: humeur === h ? '#4A5A2A' : 'transparent',
+                color: humeur === h ? '#fff' : 'inherit',
+            }}
+        >
+            {h}
+        </button>
+    ))}
+    </div>
     <p><button onClick={onLogout}>Déconnexion</button></p>
     </div>
     );
