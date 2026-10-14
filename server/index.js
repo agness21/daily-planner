@@ -7,6 +7,8 @@ const planRoutes = require('./routes/plans');
 
 const tachesRoutes = require('./routes/taches');
 
+const eauRoutes = require('./routes/eau');
+
 require('dotenv').config(); //lire le fichier .env
 
 const app = express(); //cree l'app express
@@ -18,6 +20,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/taches', tachesRoutes);
+app.use('/api/eau', eauRoutes);
+
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });

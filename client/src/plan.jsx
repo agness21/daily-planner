@@ -7,6 +7,7 @@ export default function Plan({ token , onLogout }) {
     const [plan, setPlan] = useState(null);
     const [taches, setTaches] = useState([]);
     const [titre, setTitre] = useState('');
+    const [verres, setVerres] = useState(0);
 
     const headers = {
         'Content-Type': 'application/json',
@@ -22,6 +23,7 @@ export default function Plan({ token , onLogout }) {
                 if (data.error) return onLogout(); // Si le token est invalide, déconnecter l'utilisateur
                 setPlan(data.plan);
                 setTaches(data.taches);
+                setVerres(data.eau ? data.eau.nb_verres : 0);
             });
     }, []);
 
@@ -51,32 +53,63 @@ export default function Plan({ token , onLogout }) {
             headers,
         });
         setTaches(taches.filter((t) => t.id !== id)); // Supprimer la tâche de l'état
+    };
+
+    //gestion de l'eau
+    async function majEau(n) {
+        //avec clique sur un verre
+        const nouveau = n === verres ? n-1 : n;
+        
+        setVerres(nouveau);
+        await fetch(`${API}/eau`, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify({ plan_id : plan.id, nb_verres: nouveau }),
+        });
     }
 
+
     return (
-          <div style={{ padding: 40, maxWidth: 480 }}>
-      <h1>Daily Planner</h1>
-      <p>{date}</p>
+        <div style={{ padding: 40, maxWidth: 480 }}>
+        <h1>Daily Planner</h1>
+        <p>{date}</p>
 
-      <h2>Tâches du jour</h2>
-      {taches.map((t) => (
+        <h2>Tâches du jour</h2>
+        {taches.map((t) => (
         <div key={t.id}>
-          <input type="checkbox" checked={t.terminee} onChange={() => cocherTache(t.id)} />
-          <span style={{ textDecoration: t.terminee ? 'line-through' : 'none' }}>
+        <input type="checkbox" checked={t.terminee} onChange={() => cocherTache(t.id)} />
+        <span style={{ textDecoration: t.terminee ? 'line-through' : 'none' }}>
             {' '}{t.titre}{' '}
-          </span>
-          <button onClick={() => supprimerTache(t.id)}>Supprimer</button>
+        </span>
+        <button onClick={() => supprimerTache(t.id)}>Supprimer</button>
         </div>
-      ))}
+    ))}
 
-      <input
+    <input
         placeholder="Nouvelle tâche"
         value={titre}
         onChange={(e) => setTitre(e.target.value)}
-      />
-      <button onClick={ajouterTache}>Ajouter</button>
+    />
+    <button onClick={ajouterTache}>Ajouter</button>
 
-      <p><button onClick={onLogout}>Déconnexion</button></p>
+    <h2>Suivi de l'eau</h2>
+    <div>
+        {Array.from({ length: 8 }, (_, i) => (
+            <button key={i} onClick={() => majEau(i + 1)}
+                style={{ 
+                    width: 32,
+                    height: 40,
+                    marginRight: 6,
+                    cursor: 'pointer',
+                    border: '1.5px solid #4A5A2A',
+                    background: i < verres ? '#4A5A2A' : 'transparent',
+        }}
+    />
+    ))}
     </div>
-  );
+    <p>{verres} / 8 verres</p>
+
+    <p><button onClick={onLogout}>Déconnexion</button></p>
+    </div>
+    );
 }
